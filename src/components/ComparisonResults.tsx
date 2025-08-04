@@ -21,6 +21,32 @@ interface ComparisonResultsProps {
         report1: boolean;
         report2: boolean;
       }[];
+      dimensionScores: {
+        fieldSelection: {
+          report1: number;
+          report2: number;
+        };
+        informationUsage: {
+          report1: number;
+          report2: number;
+        };
+        logicalReasonableness: {
+          report1: number;
+          report2: number;
+        };
+        clarityStructure: {
+          report1: number;
+          report2: number;
+        };
+        languageQuality: {
+          report1: number;
+          report2: number;
+        };
+        totalScore: {
+          report1: number;
+          report2: number;
+        };
+      };
     };
     optimizationRecommendations: string;
   };
@@ -177,6 +203,115 @@ export const ComparisonResults = ({ results, reportNames }: ComparisonResultsPro
                       </TableCell>
                     </TableRow>
                   ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {/* 维度评分对比 */}
+          {hardMetrics.dimensionScores && (
+            <div>
+              <h4 className="font-semibold mb-3">专业评估维度评分对比</h4>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>评估维度</TableHead>
+                    <TableHead className="text-center">{reportNames.report1}</TableHead>
+                    <TableHead className="text-center">{reportNames.report2}</TableHead>
+                    <TableHead className="text-center">满分</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">字段选择合理性</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-sm">
+                        {hardMetrics.dimensionScores.fieldSelection.report1}/20
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-sm">
+                        {hardMetrics.dimensionScores.fieldSelection.report2}/20
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center text-muted-foreground">20</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">信息运用与来源引用</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-sm">
+                        {hardMetrics.dimensionScores.informationUsage.report1}/20
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-sm">
+                        {hardMetrics.dimensionScores.informationUsage.report2}/20
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center text-muted-foreground">20</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">逻辑合理性</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-sm">
+                        {hardMetrics.dimensionScores.logicalReasonableness.report1}/20
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-sm">
+                        {hardMetrics.dimensionScores.logicalReasonableness.report2}/20
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center text-muted-foreground">20</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">清晰度与条理性</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-sm">
+                        {hardMetrics.dimensionScores.clarityStructure.report1}/20
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-sm">
+                        {hardMetrics.dimensionScores.clarityStructure.report2}/20
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center text-muted-foreground">20</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">语言质量与语气</TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-sm">
+                        {hardMetrics.dimensionScores.languageQuality.report1}/20
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="text-sm">
+                        {hardMetrics.dimensionScores.languageQuality.report2}/20
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center text-muted-foreground">20</TableCell>
+                  </TableRow>
+                  <TableRow className="bg-muted/30">
+                    <TableCell className="font-bold">总分</TableCell>
+                    <TableCell className="text-center">
+                      <Badge 
+                        variant={hardMetrics.dimensionScores.totalScore.report1 > hardMetrics.dimensionScores.totalScore.report2 ? "default" : "secondary"} 
+                        className="text-base font-bold"
+                      >
+                        {hardMetrics.dimensionScores.totalScore.report1}/100
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge 
+                        variant={hardMetrics.dimensionScores.totalScore.report2 > hardMetrics.dimensionScores.totalScore.report1 ? "default" : "secondary"} 
+                        className="text-base font-bold"
+                      >
+                        {hardMetrics.dimensionScores.totalScore.report2}/100
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center text-muted-foreground font-bold">100</TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </div>
