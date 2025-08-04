@@ -144,6 +144,7 @@ serve(async (req) => {
 
 2. 模块/字段来源对比：{"moduleComparison": [{"module": "模块名", "report1": true/false, "report2": true/false}]}
    请检查是否包含：企业概况、历史、主营业务、财务、管理层/股东、品牌资质、风险信用等关键领域
+   注意：只列出两份报告中至少有一份包含的模块（两份报告模块的并集），不应该出现两份报告都不包含的模块
 
 3. 数据验证对比：{"dataValidation": [{"dataPoint": "数据点", "report1": true/false, "report2": true/false}]}
    请检查关键数据是否有明确来源引用和正确运用
