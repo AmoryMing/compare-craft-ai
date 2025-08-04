@@ -97,10 +97,18 @@ export const ComparisonResults = ({ results, reportNames }: ComparisonResultsPro
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="prose prose-sm max-w-none">
-            <div className="whitespace-pre-wrap text-foreground">
-              {comprehensiveAnalysis}
-            </div>
+          <div className="prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+            <div 
+              className="whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{
+                __html: comprehensiveAnalysis
+                  .replace(/### (.*?)(?=\n|$)/g, '<h3 class="text-lg font-semibold mt-4 mb-2 text-foreground">$1</h3>')
+                  .replace(/#### (.*?)(?=\n|$)/g, '<h4 class="text-base font-semibold mt-3 mb-2 text-foreground">$1</h4>')
+                  .replace(/##### (.*?)(?=\n|$)/g, '<h5 class="text-sm font-semibold mt-2 mb-1 text-foreground">$1</h5>')
+                  .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
+                  .replace(/\n/g, '<br/>')
+              }}
+            />
           </div>
         </CardContent>
       </Card>
@@ -238,10 +246,18 @@ export const ComparisonResults = ({ results, reportNames }: ComparisonResultsPro
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="prose prose-sm max-w-none">
-            <div className="whitespace-pre-wrap text-foreground">
-              {optimizationRecommendations}
-            </div>
+          <div className="prose prose-sm max-w-none prose-headings:text-foreground prose-p:text-foreground prose-li:text-foreground prose-strong:text-foreground">
+            <div 
+              className="whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{
+                __html: optimizationRecommendations
+                  .replace(/### (.*?)(?=\n|$)/g, '<h3 class="text-lg font-semibold mt-4 mb-2 text-foreground">$1</h3>')
+                  .replace(/#### (.*?)(?=\n|$)/g, '<h4 class="text-base font-semibold mt-3 mb-2 text-foreground">$1</h4>')
+                  .replace(/##### (.*?)(?=\n|$)/g, '<h5 class="text-sm font-semibold mt-2 mb-1 text-foreground">$1</h5>')
+                  .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
+                  .replace(/\n/g, '<br/>')
+              }}
+            />
           </div>
         </CardContent>
       </Card>
