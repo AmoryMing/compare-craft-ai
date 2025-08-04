@@ -24,9 +24,13 @@ interface ComparisonResultsProps {
     };
     optimizationRecommendations: string;
   };
+  reportNames: {
+    report1: string;
+    report2: string;
+  };
 }
 
-export const ComparisonResults = ({ results }: ComparisonResultsProps) => {
+export const ComparisonResults = ({ results, reportNames }: ComparisonResultsProps) => {
   const { comprehensiveAnalysis, hardMetrics, optimizationRecommendations } = results;
 
   return (
@@ -63,11 +67,11 @@ export const ComparisonResults = ({ results }: ComparisonResultsProps) => {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-4 bg-muted rounded-lg">
                 <div className="text-2xl font-bold text-primary">{hardMetrics.wordCount.report1}</div>
-                <div className="text-sm text-muted-foreground">报告 1 字数</div>
+                <div className="text-sm text-muted-foreground">{reportNames.report1} 字数</div>
               </div>
               <div className="text-center p-4 bg-muted rounded-lg">
                 <div className="text-2xl font-bold text-primary">{hardMetrics.wordCount.report2}</div>
-                <div className="text-sm text-muted-foreground">报告 2 字数</div>
+                <div className="text-sm text-muted-foreground">{reportNames.report2} 字数</div>
               </div>
             </div>
           </div>
@@ -80,8 +84,8 @@ export const ComparisonResults = ({ results }: ComparisonResultsProps) => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>模块名称</TableHead>
-                    <TableHead className="text-center">报告 1</TableHead>
-                    <TableHead className="text-center">报告 2</TableHead>
+                    <TableHead className="text-center">{reportNames.report1}</TableHead>
+                    <TableHead className="text-center">{reportNames.report2}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -117,8 +121,8 @@ export const ComparisonResults = ({ results }: ComparisonResultsProps) => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>数据点</TableHead>
-                    <TableHead className="text-center">报告 1</TableHead>
-                    <TableHead className="text-center">报告 2</TableHead>
+                    <TableHead className="text-center">{reportNames.report1}</TableHead>
+                    <TableHead className="text-center">{reportNames.report2}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

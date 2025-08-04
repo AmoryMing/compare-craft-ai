@@ -8,11 +8,23 @@ import { ArrowLeft } from "lucide-react";
 
 const Index = () => {
   const [results, setResults] = useState(null);
+  const [reportNames, setReportNames] = useState({ report1: "报告 1", report2: "报告 2" });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleReportsUploaded = async (report1: string, report2: string, customPrompt?: string) => {
+  const handleReportsUploaded = async (
+    report1: string, 
+    report2: string, 
+    customPrompt?: string, 
+    report1Name?: string, 
+    report2Name?: string
+  ) => {
     setIsLoading(true);
+    
+    // 保存报告名称
+    if (report1Name && report2Name) {
+      setReportNames({ report1: report1Name, report2: report2Name });
+    }
     
     try {
       const { data, error } = await supabase.functions.invoke('compare-reports', {
@@ -42,6 +54,7 @@ const Index = () => {
 
   const handleReset = () => {
     setResults(null);
+    setReportNames({ report1: "报告 1", report2: "报告 2" });
   };
 
   return (
@@ -59,7 +72,7 @@ const Index = () => {
                 返回上传页面
               </Button>
             </div>
-            <ComparisonResults results={results} />
+            <ComparisonResults results={results} reportNames={reportNames} />
           </div>
         ) : (
           <ReportUploader 
