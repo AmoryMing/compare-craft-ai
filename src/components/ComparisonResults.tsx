@@ -140,11 +140,11 @@ export const ComparisonResults = ({ results, reportNames }: ComparisonResultsPro
           {/* 模块对比 */}
           {hardMetrics.moduleComparison.length > 0 && (
             <div>
-              <h4 className="font-semibold mb-3">模块/字段来源对比</h4>
+              <h4 className="font-semibold mb-3">字段内容与引用来源对比</h4>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>模块名称</TableHead>
+                    <TableHead className="w-1/2">字段内容/引用来源</TableHead>
                     <TableHead className="text-center">{reportNames.report1}</TableHead>
                     <TableHead className="text-center">{reportNames.report2}</TableHead>
                   </TableRow>
@@ -152,7 +152,9 @@ export const ComparisonResults = ({ results, reportNames }: ComparisonResultsPro
                 <TableBody>
                   {hardMetrics.moduleComparison.map((item, index) => (
                     <TableRow key={index}>
-                      <TableCell className="font-medium">{item.module}</TableCell>
+                      <TableCell className="font-medium text-sm leading-relaxed max-w-md">
+                        <div className="whitespace-pre-wrap break-words">{item.module}</div>
+                      </TableCell>
                       <TableCell className="text-center">
                         {item.report1 ? (
                           <CheckCircle className="h-5 w-5 text-green-500 mx-auto" />

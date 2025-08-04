@@ -144,9 +144,9 @@ serve(async (req) => {
 
 1. 字数统计：{"wordCount": {"report1": 数字, "report2": 数字}}
 
-2. 模块/字段来源对比：{"moduleComparison": [{"module": "模块名", "report1": true/false, "report2": true/false}]}
-   请检查是否包含：企业概况、历史、主营业务、财务、管理层/股东、品牌资质、风险信用等关键领域
-   注意：只列出两份报告中至少有一份包含的模块（两份报告模块的并集），不应该出现两份报告都不包含的模块
+2. 模块/字段来源对比：{"moduleComparison": [{"module": "具体字段内容或引用来源", "report1": true/false, "report2": true/false}]}
+   请提取两份报告中出现的具体字段内容和引用来源，如"注册资本：1000万元"、"数据来源：企查查"等具体表述
+   注意：只列出两份报告中至少有一份包含的具体内容（两份报告内容的并集），不应该出现两份报告都不包含的内容
 
 3. 数字数据验证对比：{"dataValidation": [{"dataPoint": "数据点名称", "report1Value": "报告1中的具体数值", "report2Value": "报告2中的具体数值", "status": "correct/incorrect/suspicious", "reason": "判断理由详细说明"}]}
    专注于数字数据的对比验证，如注册资本、营收、员工数、成立时间等关键数字信息。
