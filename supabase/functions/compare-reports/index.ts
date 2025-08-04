@@ -121,7 +121,9 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Function started, processing request...');
     const { report1, report2, customPrompt }: ComparisonRequest = await req.json();
+    console.log('Request parsed successfully');
 
     // System prompt for comprehensive analysis
     const systemPrompt = `你是一位专业的企业信息分析师，需要对两份企业报告进行详细的对比分析。
@@ -169,10 +171,12 @@ serve(async (req) => {
     const userPrompt = customPrompt || "请对比这两份报告，分析它们的差异和优劣。";
 
     // First API call: Comprehensive analysis
+    console.log('Starting comprehensive analysis...');
     const comprehensiveAnalysis = await callAIModel([
       { role: 'system', content: systemPrompt },
       { role: 'user', content: `${userPrompt}\n\n报告1：\n${report1}\n\n报告2：\n${report2}` }
     ], { temperature: 0.3 });
+    console.log('Comprehensive analysis completed');
 
     // Second API call: Hard metrics extraction
     const metricsPrompt = `请按照企业调研报告评估规则，提取以下硬性指标，以JSON格式返回：
@@ -202,10 +206,12 @@ serve(async (req) => {
 
 请严格按照企业调研报告评估标准进行评分，并返回完整的JSON对象。`;
 
+    console.log('Starting metrics extraction...');
     const metricsText = await callAIModel([
       { role: 'system', content: '你是一个数据分析专家，请严格按照JSON格式返回分析结果。' },
       { role: 'user', content: `${metricsPrompt}\n\n报告1：\n${report1}\n\n报告2：\n${report2}` }
     ], { temperature: 0.1 });
+    console.log('Metrics extraction completed');
     let hardMetrics: HardMetrics;
     
     try {
@@ -250,11 +256,14 @@ serve(async (req) => {
 
 提供实用且聚焦的改进建议，避免泛泛而谈。`;
 
+    console.log('Starting optimization recommendations...');
     const optimizationRecommendations = await callAIModel([
       { role: 'system', content: '你是一个报告优化专家，请提供实用的改进建议。' },
       { role: 'user', content: `${recommendationsPrompt}\n\n分析结果：${comprehensiveAnalysis}\n\n硬性指标：${JSON.stringify(hardMetrics)}` }
     ], { temperature: 0.4 });
+    console.log('Optimization recommendations completed');
 
+    console.log('All analysis completed, sending response...');
     return new Response(JSON.stringify({
       comprehensiveAnalysis,
       hardMetrics,
