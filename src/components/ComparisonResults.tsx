@@ -43,17 +43,10 @@ export const ComparisonResults = ({ results, reportNames }: ComparisonResultsPro
 
   return (
     <div className="space-y-6">
-      {/* 综合分析 */}
+      {/* 对比结论 */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            综合对比分析
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* 结论部分 */}
-          <div className="mb-6 p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
+        <CardContent className="pt-6">
+          <div className="p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
             <div className="text-lg font-medium text-foreground">
               两份报告差异 <span className="text-primary font-bold">{diffPercentage}%</span>，
               {comparisonSymbol === '=' ? (
@@ -63,7 +56,18 @@ export const ComparisonResults = ({ results, reportNames }: ComparisonResultsPro
               )}
             </div>
           </div>
-          
+        </CardContent>
+      </Card>
+
+      {/* 综合分析 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            综合对比分析
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="prose prose-sm max-w-none">
             <div className="whitespace-pre-wrap text-foreground">
               {comprehensiveAnalysis}
