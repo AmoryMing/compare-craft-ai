@@ -33,6 +33,14 @@ interface ComparisonResultsProps {
 export const ComparisonResults = ({ results, reportNames }: ComparisonResultsProps) => {
   const { comprehensiveAnalysis, hardMetrics, optimizationRecommendations } = results;
 
+  // 计算差异百分比和比较结果
+  const wordCount1 = hardMetrics.wordCount.report1;
+  const wordCount2 = hardMetrics.wordCount.report2;
+  const diffPercentage = Math.abs(((wordCount1 - wordCount2) / Math.max(wordCount1, wordCount2)) * 100).toFixed(1);
+  const comparisonSymbol = wordCount1 > wordCount2 ? '>' : wordCount1 < wordCount2 ? '<' : '=';
+  const higherReport = wordCount1 > wordCount2 ? reportNames.report1 : reportNames.report2;
+  const lowerReport = wordCount1 > wordCount2 ? reportNames.report2 : reportNames.report1;
+
   return (
     <div className="space-y-6">
       {/* 综合分析 */}
@@ -44,6 +52,18 @@ export const ComparisonResults = ({ results, reportNames }: ComparisonResultsPro
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {/* 结论部分 */}
+          <div className="mb-6 p-4 bg-muted/50 rounded-lg border-l-4 border-primary">
+            <div className="text-lg font-medium text-foreground">
+              两份报告差异 <span className="text-primary font-bold">{diffPercentage}%</span>，
+              {comparisonSymbol === '=' ? (
+                <span className="mx-1">{higherReport} <span className="text-primary font-bold">=</span> {lowerReport}</span>
+              ) : (
+                <span className="mx-1">{higherReport} <span className="text-primary font-bold">{comparisonSymbol}</span> {lowerReport}</span>
+              )}
+            </div>
+          </div>
+          
           <div className="prose prose-sm max-w-none">
             <div className="whitespace-pre-wrap text-foreground">
               {comprehensiveAnalysis}
