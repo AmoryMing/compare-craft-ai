@@ -66,7 +66,7 @@ async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) 
   // Try ZhiPu GLM-4.5 first if API key is available
   if (zhipuApiKey) {
     try {
-      console.log('Trying ZhiPu GLM-4-Flash...');
+      console.log('Trying ZhiPu GLM-4.5...');
       const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
         method: 'POST',
         headers: {
@@ -74,7 +74,7 @@ async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'glm-4-flash',
+          model: 'glm-4.5',
           messages: messages,
           temperature: modelConfig.temperature,
           max_tokens: 4000,
@@ -83,15 +83,15 @@ async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) 
 
       if (response.ok) {
         const data = await response.json();
-        console.log('ZhiPu GLM-4-Flash response received');
+        console.log('ZhiPu GLM-4.5 response received');
         return data.choices[0].message.content;
       } else {
         const errorText = await response.text();
-        console.log(`ZhiPu GLM-4-Flash failed: ${response.status} - ${errorText}`);
+        console.log(`ZhiPu GLM-4.5 failed: ${response.status} - ${errorText}`);
         console.log('Falling back to OpenAI...');
       }
     } catch (error) {
-      console.error('ZhiPu GLM-4-Flash error:', error);
+      console.error('ZhiPu GLM-4.5 error:', error);
       console.log('Falling back to OpenAI...');
     }
   }
