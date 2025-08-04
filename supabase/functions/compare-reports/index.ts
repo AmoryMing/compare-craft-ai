@@ -26,8 +26,10 @@ interface HardMetrics {
   }[];
   dataValidation: {
     dataPoint: string;
-    report1: boolean;
-    report2: boolean;
+    report1Value: string | number;
+    report2Value: string | number;
+    status: 'correct' | 'incorrect' | 'suspicious';
+    reason: string;
   }[];
   dimensionScores: {
     fieldSelection: {
@@ -146,8 +148,13 @@ serve(async (req) => {
    请检查是否包含：企业概况、历史、主营业务、财务、管理层/股东、品牌资质、风险信用等关键领域
    注意：只列出两份报告中至少有一份包含的模块（两份报告模块的并集），不应该出现两份报告都不包含的模块
 
-3. 数据验证对比：{"dataValidation": [{"dataPoint": "数据点", "report1": true/false, "report2": true/false}]}
-   请检查关键数据是否有明确来源引用和正确运用
+3. 数字数据验证对比：{"dataValidation": [{"dataPoint": "数据点名称", "report1Value": "报告1中的具体数值", "report2Value": "报告2中的具体数值", "status": "correct/incorrect/suspicious", "reason": "判断理由详细说明"}]}
+   专注于数字数据的对比验证，如注册资本、营收、员工数、成立时间等关键数字信息。
+   验证逻辑：
+   - 首先比较两份报告中相同数据点的数值是否一致
+   - 如果数值不同，分析哪个更可能正确（基于逻辑合理性、数据来源、时间一致性等）
+   - status说明：correct=数据一致或明确正确，incorrect=明确错误，suspicious=存疑需进一步核实
+   - reason需要详细说明判断依据，如"两份报告数据一致"、"报告1数据明显不合理（如员工数为负数）"、"报告2缺乏数据来源"等
 
 4. 维度评分对比：{"dimensionScores": {
    "fieldSelection": {"report1": 分数(0-20), "report2": 分数(0-20)},

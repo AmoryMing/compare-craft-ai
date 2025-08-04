@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle, BarChart3, FileText, Lightbulb } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CheckCircle, XCircle, BarChart3, FileText, Lightbulb, AlertTriangle } from "lucide-react";
 
 interface ComparisonResultsProps {
   results: {
@@ -18,8 +19,10 @@ interface ComparisonResultsProps {
       }[];
       dataValidation: {
         dataPoint: string;
-        report1: boolean;
-        report2: boolean;
+        report1Value: string | number;
+        report2Value: string | number;
+        status: 'correct' | 'incorrect' | 'suspicious';
+        reason: string;
       }[];
       dimensionScores: {
         fieldSelection: {
@@ -163,48 +166,64 @@ export const ComparisonResults = ({ results, reportNames }: ComparisonResultsPro
             </div>
           )}
 
-          {/* 数据验证对比 */}
+          {/* 数字数据验证对比 */}
           {hardMetrics.dataValidation.length > 0 && (
             <div>
-              <h4 className="font-semibold mb-3">数据验证对比</h4>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>数据点</TableHead>
-                    <TableHead className="text-center">{reportNames.report1}</TableHead>
-                    <TableHead className="text-center">{reportNames.report2}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {hardMetrics.dataValidation.map((item, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{item.dataPoint}</TableCell>
-                      <TableCell className="text-center">
-                        {item.report1 ? (
-                          <Badge variant="default" className="text-xs">
-                            正确
-                          </Badge>
-                        ) : (
-                          <Badge variant="destructive" className="text-xs">
-                            错误
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {item.report2 ? (
-                          <Badge variant="default" className="text-xs">
-                            正确
-                          </Badge>
-                        ) : (
-                          <Badge variant="destructive" className="text-xs">
-                            错误
-                          </Badge>
-                        )}
-                      </TableCell>
+              <h4 className="font-semibold mb-3">数字数据验证对比</h4>
+              <TooltipProvider>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>数据点</TableHead>
+                      <TableHead className="text-center">{reportNames.report1}</TableHead>
+                      <TableHead className="text-center">{reportNames.report2}</TableHead>
+                      <TableHead className="text-center">验证状态</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {hardMetrics.dataValidation.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{item.dataPoint}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">
+                          {item.report1Value}
+                        </TableCell>
+                        <TableCell className="text-center font-mono text-sm">
+                          {item.report2Value}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="inline-flex items-center cursor-help">
+                                {item.status === 'correct' && (
+                                  <Badge variant="default" className="text-xs bg-green-100 text-green-800 hover:bg-green-200">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    正确
+                                  </Badge>
+                                )}
+                                {item.status === 'incorrect' && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    <XCircle className="h-3 w-3 mr-1" />
+                                    错误
+                                  </Badge>
+                                )}
+                                {item.status === 'suspicious' && (
+                                  <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
+                                    <AlertTriangle className="h-3 w-3 mr-1" />
+                                    存疑
+                                  </Badge>
+                                )}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs text-sm">{item.reason}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TooltipProvider>
             </div>
           )}
         </CardContent>
