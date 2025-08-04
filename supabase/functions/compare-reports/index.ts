@@ -5,9 +5,7 @@ const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, accept, accept-language, x-requested-with',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Max-Age': '3600',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 interface ComparisonRequest {
@@ -61,54 +59,13 @@ interface HardMetrics {
   };
 }
 
-// Helper function to call OpenAI GPT model
-async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) {
-  if (!openAIApiKey) {
-    console.error('No OpenAI API key available');
-    throw new Error('No OpenAI API key available');
-  }
-
-  console.log('Using OpenAI GPT-4.1...');
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4.1-2025-04-14',
-      messages: messages,
-      temperature: modelConfig.temperature,
-      max_tokens: 4000,
-    }),
-  });
-
-  if (response.ok) {
-    const data = await response.json();
-    console.log('OpenAI GPT-4.1 response received');
-    return data.choices[0].message.content;
-  } else {
-    const errorText = await response.text();
-    console.error(`OpenAI API error: ${response.status} - ${errorText}`);
-    throw new Error(`OpenAI API failed: ${response.status}`);
-  }
-}
-
 serve(async (req) => {
-  console.log('Function invoked, method:', req.method);
-  
   if (req.method === 'OPTIONS') {
-    console.log('Handling CORS preflight request');
-    return new Response(null, { 
-      status: 200,
-      headers: corsHeaders 
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('Function started, processing request...');
     const { report1, report2, customPrompt }: ComparisonRequest = await req.json();
-    console.log('Request parsed successfully');
 
     // System prompt for comprehensive analysis
     const systemPrompt = `你是一位专业的企业信息分析师，需要对两份企业报告进行详细的对比分析。
@@ -156,12 +113,24 @@ serve(async (req) => {
     const userPrompt = customPrompt || "请对比这两份报告，分析它们的差异和优劣。";
 
     // First API call: Comprehensive analysis
-    console.log('Starting comprehensive analysis...');
-    const comprehensiveAnalysis = await callAIModel([
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: `${userPrompt}\n\n报告1：\n${report1}\n\n报告2：\n${report2}` }
-    ], { temperature: 0.3 });
-    console.log('Comprehensive analysis completed');
+    const analysisResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `${userPrompt}\n\n报告1：\n${report1}\n\n报告2：\n${report2}` }
+        ],
+        temperature: 0.3,
+      }),
+    });
+
+    const analysisData = await analysisResponse.json();
+    const comprehensiveAnalysis = analysisData.choices[0].message.content;
 
     // Second API call: Hard metrics extraction
     const metricsPrompt = `请按照企业调研报告评估规则，提取以下硬性指标，以JSON格式返回：
@@ -191,15 +160,27 @@ serve(async (req) => {
 
 请严格按照企业调研报告评估标准进行评分，并返回完整的JSON对象。`;
 
-    console.log('Starting metrics extraction...');
-    const metricsText = await callAIModel([
-      { role: 'system', content: '你是一个数据分析专家，请严格按照JSON格式返回分析结果。' },
-      { role: 'user', content: `${metricsPrompt}\n\n报告1：\n${report1}\n\n报告2：\n${report2}` }
-    ], { temperature: 0.1 });
-    console.log('Metrics extraction completed');
+    const metricsResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: '你是一个数据分析专家，请严格按照JSON格式返回分析结果。' },
+          { role: 'user', content: `${metricsPrompt}\n\n报告1：\n${report1}\n\n报告2：\n${report2}` }
+        ],
+        temperature: 0.1,
+      }),
+    });
+
+    const metricsData = await metricsResponse.json();
     let hardMetrics: HardMetrics;
     
     try {
+      const metricsText = metricsData.choices[0].message.content;
       const jsonMatch = metricsText.match(/\{[\s\S]*\}/);
       hardMetrics = JSON.parse(jsonMatch ? jsonMatch[0] : metricsText);
     } catch (error) {
@@ -241,14 +222,25 @@ serve(async (req) => {
 
 提供实用且聚焦的改进建议，避免泛泛而谈。`;
 
-    console.log('Starting optimization recommendations...');
-    const optimizationRecommendations = await callAIModel([
-      { role: 'system', content: '你是一个报告优化专家，请提供实用的改进建议。' },
-      { role: 'user', content: `${recommendationsPrompt}\n\n分析结果：${comprehensiveAnalysis}\n\n硬性指标：${JSON.stringify(hardMetrics)}` }
-    ], { temperature: 0.4 });
-    console.log('Optimization recommendations completed');
+    const recommendationsResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: '你是一个报告优化专家，请提供实用的改进建议。' },
+          { role: 'user', content: `${recommendationsPrompt}\n\n分析结果：${comprehensiveAnalysis}\n\n硬性指标：${JSON.stringify(hardMetrics)}` }
+        ],
+        temperature: 0.4,
+      }),
+    });
 
-    console.log('All analysis completed, sending response...');
+    const recommendationsData = await recommendationsResponse.json();
+    const optimizationRecommendations = recommendationsData.choices[0].message.content;
+
     return new Response(JSON.stringify({
       comprehensiveAnalysis,
       hardMetrics,
