@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const zhipuApiKey = Deno.env.get('ZHIPU_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -59,6 +60,61 @@ interface HardMetrics {
   };
 }
 
+// Helper function to call AI models with fallback
+async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) {
+  // Try ZhiPu GLM-4.5 first if API key is available
+  if (zhipuApiKey) {
+    try {
+      console.log('Trying ZhiPu GLM-4.5...');
+      const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${zhipuApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'glm-4.5',
+          messages: messages,
+          temperature: modelConfig.temperature,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('ZhiPu GLM-4.5 response received');
+        return data.choices[0].message.content;
+      } else {
+        console.log('ZhiPu GLM-4.5 failed, falling back to OpenAI');
+      }
+    } catch (error) {
+      console.error('ZhiPu GLM-4.5 error:', error);
+      console.log('Falling back to OpenAI...');
+    }
+  }
+
+  // Fallback to OpenAI GPT-4o-mini
+  if (openAIApiKey) {
+    console.log('Using OpenAI GPT-4o-mini...');
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: messages,
+        temperature: modelConfig.temperature,
+      }),
+    });
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  }
+
+  throw new Error('No AI API keys available');
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -113,24 +169,10 @@ serve(async (req) => {
     const userPrompt = customPrompt || "请对比这两份报告，分析它们的差异和优劣。";
 
     // First API call: Comprehensive analysis
-    const analysisResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `${userPrompt}\n\n报告1：\n${report1}\n\n报告2：\n${report2}` }
-        ],
-        temperature: 0.3,
-      }),
-    });
-
-    const analysisData = await analysisResponse.json();
-    const comprehensiveAnalysis = analysisData.choices[0].message.content;
+    const comprehensiveAnalysis = await callAIModel([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `${userPrompt}\n\n报告1：\n${report1}\n\n报告2：\n${report2}` }
+    ], { temperature: 0.3 });
 
     // Second API call: Hard metrics extraction
     const metricsPrompt = `请按照企业调研报告评估规则，提取以下硬性指标，以JSON格式返回：
@@ -160,27 +202,13 @@ serve(async (req) => {
 
 请严格按照企业调研报告评估标准进行评分，并返回完整的JSON对象。`;
 
-    const metricsResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: '你是一个数据分析专家，请严格按照JSON格式返回分析结果。' },
-          { role: 'user', content: `${metricsPrompt}\n\n报告1：\n${report1}\n\n报告2：\n${report2}` }
-        ],
-        temperature: 0.1,
-      }),
-    });
-
-    const metricsData = await metricsResponse.json();
+    const metricsText = await callAIModel([
+      { role: 'system', content: '你是一个数据分析专家，请严格按照JSON格式返回分析结果。' },
+      { role: 'user', content: `${metricsPrompt}\n\n报告1：\n${report1}\n\n报告2：\n${report2}` }
+    ], { temperature: 0.1 });
     let hardMetrics: HardMetrics;
     
     try {
-      const metricsText = metricsData.choices[0].message.content;
       const jsonMatch = metricsText.match(/\{[\s\S]*\}/);
       hardMetrics = JSON.parse(jsonMatch ? jsonMatch[0] : metricsText);
     } catch (error) {
@@ -222,24 +250,10 @@ serve(async (req) => {
 
 提供实用且聚焦的改进建议，避免泛泛而谈。`;
 
-    const recommendationsResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: '你是一个报告优化专家，请提供实用的改进建议。' },
-          { role: 'user', content: `${recommendationsPrompt}\n\n分析结果：${comprehensiveAnalysis}\n\n硬性指标：${JSON.stringify(hardMetrics)}` }
-        ],
-        temperature: 0.4,
-      }),
-    });
-
-    const recommendationsData = await recommendationsResponse.json();
-    const optimizationRecommendations = recommendationsData.choices[0].message.content;
+    const optimizationRecommendations = await callAIModel([
+      { role: 'system', content: '你是一个报告优化专家，请提供实用的改进建议。' },
+      { role: 'user', content: `${recommendationsPrompt}\n\n分析结果：${comprehensiveAnalysis}\n\n硬性指标：${JSON.stringify(hardMetrics)}` }
+    ], { temperature: 0.4 });
 
     return new Response(JSON.stringify({
       comprehensiveAnalysis,
