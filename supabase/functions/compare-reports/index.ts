@@ -6,8 +6,9 @@ const zhipuApiKey = Deno.env.get('ZHIPU_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, accept, accept-language, x-requested-with',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Max-Age': '3600',
 };
 
 interface ComparisonRequest {
@@ -77,7 +78,7 @@ async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) 
           model: 'glm-4.5',
           messages: messages,
           temperature: modelConfig.temperature,
-          max_tokens: 2000,
+          max_tokens: 4000,
           stream: false,
         }),
       });
@@ -110,7 +111,7 @@ async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) 
         model: 'gpt-4o-mini',
         messages: messages,
         temperature: modelConfig.temperature,
-        max_tokens: 2000,
+        max_tokens: 4000,
       }),
     });
 
@@ -130,8 +131,14 @@ async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) 
 }
 
 serve(async (req) => {
+  console.log('Function invoked, method:', req.method);
+  
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    console.log('Handling CORS preflight request');
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    });
   }
 
   try {
