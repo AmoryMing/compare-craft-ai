@@ -52,45 +52,23 @@ export const ReportUploader = ({ onReportsUploaded, isLoading }: ReportUploaderP
         <p className="text-muted-foreground">上传两份报告进行AI智能对比分析</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            自定义提示词
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="输入自定义提示词来调整AI对比行为（可选）"
-            value={customPrompt}
-            onChange={(e) => setCustomPrompt(e.target.value)}
-            className="min-h-[80px]"
-          />
-        </CardContent>
-      </Card>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              第一份报告
-            </CardTitle>
+              <Input
+                value={report1Name}
+                onChange={(e) => setReport1Name(e.target.value)}
+                className="font-semibold text-lg border-none p-0 h-auto focus-visible:ring-0"
+                placeholder="第一份报告"
+              />
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-sm font-medium">报告名称</label>
-              <Input
-                placeholder="输入报告名称"
-                value={report1Name}
-                onChange={(e) => setReport1Name(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
               <label className="text-sm font-medium">上传文件</label>
-              <div className="mt-1">
+              <div className="mt-2">
                 <input
                   type="file"
                   accept=".txt,.md,.doc,.docx"
@@ -106,25 +84,37 @@ export const ReportUploader = ({ onReportsUploaded, isLoading }: ReportUploaderP
                 />
                 <label
                   htmlFor="file1"
-                  className="flex items-center justify-center w-full p-4 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  className="flex items-center justify-center w-full p-6 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
                 >
                   <div className="text-center">
-                    <File className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
+                    <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-sm font-medium text-foreground mb-1">
                       {file1 ? file1.name : "点击上传文件或拖拽到此处"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      支持 TXT, MD, DOC, DOCX 格式
                     </p>
                   </div>
                 </label>
               </div>
             </div>
 
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">或</span>
+              </div>
+            </div>
+
             <div>
-              <label className="text-sm font-medium">或直接粘贴内容</label>
+              <label className="text-sm font-medium">直接粘贴内容</label>
               <Textarea
-                placeholder="也可以直接粘贴报告内容..."
+                placeholder="粘贴报告内容..."
                 value={report1}
                 onChange={(e) => setReport1(e.target.value)}
-                className="mt-1 min-h-[200px]"
+                className="mt-2 min-h-[150px]"
               />
             </div>
           </CardContent>
@@ -132,25 +122,20 @@ export const ReportUploader = ({ onReportsUploaded, isLoading }: ReportUploaderP
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              第二份报告
-            </CardTitle>
+              <Input
+                value={report2Name}
+                onChange={(e) => setReport2Name(e.target.value)}
+                className="font-semibold text-lg border-none p-0 h-auto focus-visible:ring-0"
+                placeholder="第二份报告"
+              />
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-sm font-medium">报告名称</label>
-              <Input
-                placeholder="输入报告名称"
-                value={report2Name}
-                onChange={(e) => setReport2Name(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
               <label className="text-sm font-medium">上传文件</label>
-              <div className="mt-1">
+              <div className="mt-2">
                 <input
                   type="file"
                   accept=".txt,.md,.doc,.docx"
@@ -166,30 +151,59 @@ export const ReportUploader = ({ onReportsUploaded, isLoading }: ReportUploaderP
                 />
                 <label
                   htmlFor="file2"
-                  className="flex items-center justify-center w-full p-4 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  className="flex items-center justify-center w-full p-6 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
                 >
                   <div className="text-center">
-                    <File className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
+                    <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-sm font-medium text-foreground mb-1">
                       {file2 ? file2.name : "点击上传文件或拖拽到此处"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      支持 TXT, MD, DOC, DOCX 格式
                     </p>
                   </div>
                 </label>
               </div>
             </div>
 
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">或</span>
+              </div>
+            </div>
+
             <div>
-              <label className="text-sm font-medium">或直接粘贴内容</label>
+              <label className="text-sm font-medium">直接粘贴内容</label>
               <Textarea
-                placeholder="也可以直接粘贴报告内容..."
+                placeholder="粘贴报告内容..."
                 value={report2}
                 onChange={(e) => setReport2(e.target.value)}
-                className="mt-1 min-h-[200px]"
+                className="mt-2 min-h-[150px]"
               />
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            自定义提示词
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            placeholder="输入自定义提示词来调整AI对比行为（可选）"
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            className="min-h-[80px]"
+          />
+        </CardContent>
+      </Card>
 
       <div className="text-center">
         <Button 
