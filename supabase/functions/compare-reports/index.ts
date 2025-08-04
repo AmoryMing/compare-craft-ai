@@ -2,7 +2,6 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const zhipuApiKey = Deno.env.get('ZHIPU_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -62,72 +61,37 @@ interface HardMetrics {
   };
 }
 
-// Helper function to call AI models with fallback
+// Helper function to call OpenAI GPT model
 async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) {
-  // Try ZhiPu GLM-4.5 first if API key is available
-  if (zhipuApiKey) {
-    try {
-      console.log('Trying ZhiPu GLM-4.5...');
-      const response = await fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${zhipuApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'glm-4.5',
-          messages: messages,
-          temperature: modelConfig.temperature,
-          max_tokens: 4000,
-          stream: false,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('ZhiPu GLM-4.5 response received');
-        return data.choices[0].message.content;
-      } else {
-        const errorText = await response.text();
-        console.log(`ZhiPu GLM-4.5 failed: ${response.status} - ${errorText}`);
-        console.log('Falling back to OpenAI...');
-      }
-    } catch (error) {
-      console.error('ZhiPu GLM-4.5 error:', error);
-      console.log('Falling back to OpenAI...');
-    }
+  if (!openAIApiKey) {
+    console.error('No OpenAI API key available');
+    throw new Error('No OpenAI API key available');
   }
 
-  // Fallback to OpenAI GPT-4.1
-  if (openAIApiKey) {
-    console.log('Using OpenAI GPT-4.1...');
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: messages,
-        temperature: modelConfig.temperature,
-        max_tokens: 4000,
-      }),
-    });
+  console.log('Using OpenAI GPT-4.1...');
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-4.1-2025-04-14',
+      messages: messages,
+      temperature: modelConfig.temperature,
+      max_tokens: 4000,
+    }),
+  });
 
-    if (response.ok) {
-      const data = await response.json();
-      console.log('OpenAI GPT-4.1 response received');
-      return data.choices[0].message.content;
-    } else {
-      const errorText = await response.text();
-      console.error(`OpenAI API error: ${response.status} - ${errorText}`);
-      throw new Error(`OpenAI API failed: ${response.status}`);
-    }
+  if (response.ok) {
+    const data = await response.json();
+    console.log('OpenAI GPT-4.1 response received');
+    return data.choices[0].message.content;
+  } else {
+    const errorText = await response.text();
+    console.error(`OpenAI API error: ${response.status} - ${errorText}`);
+    throw new Error(`OpenAI API failed: ${response.status}`);
   }
-
-  console.error('No AI API keys available or all APIs failed');
-  throw new Error('No AI API keys available or all APIs failed');
 }
 
 serve(async (req) => {
