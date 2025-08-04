@@ -77,7 +77,8 @@ async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) 
           model: 'glm-4.5',
           messages: messages,
           temperature: modelConfig.temperature,
-          max_tokens: 4000,
+          max_tokens: 2000,
+          stream: false,
         }),
       });
 
@@ -106,10 +107,10 @@ async function callAIModel(messages: any[], modelConfig = { temperature: 0.3 }) 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: messages,
         temperature: modelConfig.temperature,
-        max_tokens: 4000,
+        max_tokens: 2000,
       }),
     });
 
