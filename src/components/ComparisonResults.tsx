@@ -18,10 +18,8 @@ interface ComparisonResultsProps {
       }[];
       dataValidation: {
         dataPoint: string;
-        report1: string;
-        report2: string;
-        isConsistent: boolean;
-        possibleError: string;
+        report1: boolean;
+        report2: boolean;
       }[];
       dimensionScores: {
         fieldSelection: {
@@ -169,51 +167,43 @@ export const ComparisonResults = ({ results, reportNames }: ComparisonResultsPro
           {hardMetrics.dataValidation.length > 0 && (
             <div>
               <h4 className="font-semibold mb-3">数据验证对比</h4>
-               <Table>
-                 <TableHeader>
-                   <TableRow>
-                     <TableHead>数据点</TableHead>
-                     <TableHead className="text-center">{reportNames.report1}</TableHead>
-                     <TableHead className="text-center">{reportNames.report2}</TableHead>
-                     <TableHead className="text-center">一致性</TableHead>
-                     <TableHead className="text-center">可能错误</TableHead>
-                   </TableRow>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>数据点</TableHead>
+                    <TableHead className="text-center">{reportNames.report1}</TableHead>
+                    <TableHead className="text-center">{reportNames.report2}</TableHead>
+                  </TableRow>
                 </TableHeader>
-                 <TableBody>
-                   {hardMetrics.dataValidation.map((item, index) => (
-                     <TableRow key={index}>
-                       <TableCell className="font-medium">{item.dataPoint}</TableCell>
-                       <TableCell className="text-center">
-                         <span className="text-sm">{item.report1}</span>
-                       </TableCell>
-                       <TableCell className="text-center">
-                         <span className="text-sm">{item.report2}</span>
-                       </TableCell>
-                       <TableCell className="text-center">
-                         {item.isConsistent ? (
-                           <Badge variant="default" className="text-xs">
-                             一致
-                           </Badge>
-                         ) : (
-                           <Badge variant="destructive" className="text-xs">
-                             不一致
-                           </Badge>
-                         )}
-                       </TableCell>
-                       <TableCell className="text-center">
-                         {item.possibleError !== 'none' ? (
-                           <Badge variant="outline" className="text-xs">
-                             {item.possibleError === 'report1' ? reportNames.report1 : 
-                              item.possibleError === 'report2' ? reportNames.report2 :
-                              item.possibleError === 'both' ? '两者皆可能' : '-'}
-                           </Badge>
-                         ) : (
-                           <span className="text-xs text-muted-foreground">-</span>
-                         )}
-                       </TableCell>
-                     </TableRow>
-                   ))}
-                 </TableBody>
+                <TableBody>
+                  {hardMetrics.dataValidation.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{item.dataPoint}</TableCell>
+                      <TableCell className="text-center">
+                        {item.report1 ? (
+                          <Badge variant="default" className="text-xs">
+                            正确
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive" className="text-xs">
+                            错误
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {item.report2 ? (
+                          <Badge variant="default" className="text-xs">
+                            正确
+                          </Badge>
+                        ) : (
+                          <Badge variant="destructive" className="text-xs">
+                            错误
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
               </Table>
             </div>
           )}
