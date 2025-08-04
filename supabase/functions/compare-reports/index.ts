@@ -146,8 +146,13 @@ serve(async (req) => {
    请检查是否包含：企业概况、历史、主营业务、财务、管理层/股东、品牌资质、风险信用等关键领域
    注意：只列出两份报告中至少有一份包含的模块（两份报告模块的并集），不应该出现两份报告都不包含的模块
 
-3. 数据验证对比：{"dataValidation": [{"dataPoint": "数据点", "report1": true/false, "report2": true/false}]}
-   请检查关键数据是否有明确来源引用和正确运用
+3. 数据验证对比：{"dataValidation": [{"dataPoint": "数据点名称", "report1": "数值或状态", "report2": "数值或状态", "isConsistent": true/false, "possibleError": "可能错误的报告（report1/report2/both/none）"}]}
+   验证逻辑：
+   - 重点提取和比较数字数据（注册资本、营收、员工数、成立时间等关键数值）
+   - 对比两份报告中相同数据点的数值是否一致
+   - 如果数值不同，分析哪一方可能有误（基于数据来源可信度、逻辑合理性等）
+   - 检查数据的合理性（如注册资本是否符合行业常规、时间逻辑是否正确等）
+   - 标注数据来源的明确性和权威性
 
 4. 维度评分对比：{"dimensionScores": {
    "fieldSelection": {"report1": 分数(0-20), "report2": 分数(0-20)},
