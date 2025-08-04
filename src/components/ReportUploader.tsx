@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Upload, FileText, File } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -20,7 +21,27 @@ export const ReportUploader = ({ onReportsUploaded, isLoading }: ReportUploaderP
   const [customPrompt, setCustomPrompt] = useState("");
   const [file1, setFile1] = useState<File | null>(null);
   const [file2, setFile2] = useState<File | null>(null);
+  const [progress, setProgress] = useState(0);
   const { toast } = useToast();
+
+  // 模拟进度条更新
+  useEffect(() => {
+    if (isLoading) {
+      setProgress(0);
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            return prev;
+          }
+          return prev + Math.random() * 15;
+        });
+      }, 500);
+
+      return () => clearInterval(interval);
+    } else {
+      setProgress(0);
+    }
+  }, [isLoading]);
 
   const handleFileUpload = async (file: File, setReport: (content: string) => void) => {
     try {
@@ -205,7 +226,7 @@ export const ReportUploader = ({ onReportsUploaded, isLoading }: ReportUploaderP
         </CardContent>
       </Card>
 
-      <div className="text-center">
+      <div className="text-center space-y-4">
         <Button 
           onClick={handleSubmit}
           disabled={!report1.trim() || !report2.trim() || isLoading}
@@ -214,6 +235,15 @@ export const ReportUploader = ({ onReportsUploaded, isLoading }: ReportUploaderP
         >
           {isLoading ? "正在分析..." : "开始对比分析"}
         </Button>
+        
+        {isLoading && (
+          <div className="max-w-md mx-auto space-y-2">
+            <Progress value={progress} className="w-full" />
+            <p className="text-sm text-muted-foreground">
+              正在进行AI智能对比分析，请稍候...
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
